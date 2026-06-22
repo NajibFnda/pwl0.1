@@ -22,10 +22,27 @@
         <a href="#tentang-section" id="nav-tentang" class="nav-link hover:text-white pb-1 transition-all duration-200">TENTANG</a>
     </div>
     
-    <div class="flex justify-end">
+<div class="flex justify-end items-center gap-4">
+        
+        <?php if(session()->get('logged_in')): ?>
+            <div class="flex items-center gap-3 border-r border-gray-600 pr-4">
+                <span class="text-xs text-gray-300">
+                    Halo, <span class="text-white font-bold tracking-wide"><?= esc(session()->get('nama')) ?></span>
+                </span>
+                <a href="<?= base_url('logout') ?>" class="text-xs text-rose-400 hover:text-rose-500 font-bold transition" title="Keluar Sistem">
+                    Keluar ⎋
+                </a>
+            </div>
+        <?php else: ?>
+            <a href="<?= base_url('login') ?>" class="text-xs font-semibold text-gray-300 hover:text-white transition">
+                Masuk
+            </a>
+        <?php endif; ?>
+
         <a href="<?= base_url('upgrade') ?>" class="flex items-center gap-1.5 bg-[#004e89] hover:bg-[#00355d] text-white px-4 py-1.5 rounded-full text-xs font-semibold transition shadow-md">
-            <span>✦</span> Upgrade
+            <span></span> Upgrade
         </a>
+        
     </div>
 </nav>
 

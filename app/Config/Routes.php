@@ -11,3 +11,19 @@ $routes->post('cek-email', 'Home::cekEmail');
 
 // Rute Baru khusus Halaman Upgrade Pricing
 $routes->get('upgrade', 'Home::upgrade');
+
+// Mengelompokkan route khusus admin
+$routes->group('admin', function($routes) {
+    $routes->get('/', 'AdminController::index');
+    $routes->post('update-subscription/(:num)', 'AdminController::updateSubscription/$1');
+});
+
+// Route untuk halaman Login
+$routes->get('/login', 'Auth::login');
+
+$routes->get('/login', 'Auth::login');
+$routes->post('/auth/process', 'Auth::process'); // Menangkap data dari form login
+$routes->get('/logout', 'Auth::logout'); // Untuk fitur keluar
+
+$routes->get('/register', 'Auth::register');
+$routes->post('/auth/saveRegister', 'Auth::saveRegister');
