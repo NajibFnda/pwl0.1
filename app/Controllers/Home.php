@@ -52,31 +52,27 @@ class Home extends BaseController
         $is_premium = false;
 
         // -- LOGIKA PEMBATASAN KUOTA --
-        // -- LOGIKA PEMBATASAN KUOTA --
         if ($session->get('logged_in')) {
             $user_id = $session->get('id');
-            $paket = $session->get('subscription_plan'); // 'free', 'plus', atau 'pro'
+            $paket = $session->get('subscription_plan');
+            $is_premium = ($paket === 'pro' || $paket === 'plus');
 
-            // Tentukan batas berdasarkan paket
-            $usage_limit = 5; // Default free
-            if ($paket === 'plus') {
-                $usage_limit = 50; // Plus dapat 50 kali
-            } elseif ($paket === 'pro') {
-                $usage_limit = 999999; // Pro dianggap unlimited
-            }
-
-            $historyModel = new SearchHistoryModel();
+            $historyModel = new \App\Models\SearchHistoryModel();
+            
+            // Hitung sudah berapa kali user ini mencari email HARI INI
             $usage_count = $historyModel->countUserSearchesToday($user_id);
 
-            // Jika limit habis, tolak pencarian
-            if ($usage_count >= $usage_limit) {
-                return redirect()->to('/upgrade')->with('limit_reached', 'Batas kuota pencarian paket ' . strtoupper($paket) . ' Anda sudah habis!');
+            // Jika limit habis dan BUKAN premium, tolak pencarian dan ARAHKAN KE UPGRADE!
+            if ($usage_count >= $usage_limit && !$is_premium) {
+                
+                // Melempar user ke halaman upgrade dengan membawa pesan khusus
+                return redirect()->to('/upgrade')->with('limit_reached', 'Waduh! Batas pengecekan gratis Anda hari ini sudah habis. Upgrade sekarang untuk akses tanpa batas.');
+                
             }
         } else {
             // Jika tamu (belum login) mencoba mencari email, arahkan ke login
             return redirect()->to('/login')->with('error', 'Silakan masuk ke sistem terlebih dahulu untuk mengecek email.');
         }
-
         // -- SIMULASI LOGIK PENGECEKAN DATABASE / API (Kode Asli Milikmu) --
         if (strpos($emailInput, 'bocor') !== false || $emailInput == 'admin@gmail.com') {
             $status = 'pwned';

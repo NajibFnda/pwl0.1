@@ -28,7 +28,7 @@
         </div>
     </nav>
 
-    <?php if(session()->getFlashdata('limit_reached')): ?>
+        <?php if(session()->getFlashdata('limit_reached')): ?>
             <div class="max-w-3xl mx-auto mt-8 bg-rose-50 border border-rose-200 text-rose-700 px-6 py-4 rounded-xl shadow-sm flex items-center gap-3 animate-bounce">
                 <span class="text-2xl">⚠️</span>
                 <p class="font-bold text-sm"><?= session()->getFlashdata('limit_reached') ?></p>
