@@ -14,16 +14,26 @@
             <span class="text-xl font-bold tracking-wider text-blue-400">❖ PWNED</span>
         </div>
         
-        <div class="hidden md:flex justify-center space-x-6 text-sm text-gray-300">
-            <a href="<?= base_url('/') ?>" class="hover:text-white pb-1 transition-all duration-200">🏠 KEMBALI KE HOME</a>
-        </div>
+    <div id="nav-container" class="hidden md:flex justify-center space-x-8 text-xs font-bold tracking-widest text-gray-400">
+        <a href="<?= base_url('/') ?>" 
+        class="group relative flex items-center gap-2 hover:text-white transition-colors duration-300">
+            <span class="border-b-2 border-transparent group-hover:border-blue-400 pb-0.5">KEMBALI KE HOME</span>
+        </a>
+    </div>
         
         <div class="flex justify-end">
             <span class="bg-blue-500/20 text-blue-400 px-4 py-1.5 rounded-full text-xs font-bold border border-blue-500/30">
-                ✦ Premium Page
+                Premium Page
             </span>
         </div>
     </nav>
+
+    <?php if(session()->getFlashdata('limit_reached')): ?>
+            <div class="max-w-3xl mx-auto mt-8 bg-rose-50 border border-rose-200 text-rose-700 px-6 py-4 rounded-xl shadow-sm flex items-center gap-3 animate-bounce">
+                <span class="text-2xl">⚠️</span>
+                <p class="font-bold text-sm"><?= session()->getFlashdata('limit_reached') ?></p>
+            </div>
+        <?php endif; ?>
 
     <!-- MAIN SEKSI PRICING -->
     <main class="flex-grow flex items-center justify-center py-12 px-6">
@@ -52,10 +62,10 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto items-stretch">
                 
                 <!-- PAKET PLUS CARD -->
-                <div class="bg-white border-2 border-blue-500 rounded-2xl p-6 flex flex-col justify-between shadow-xl relative transform hover:scale-[1.01] transition-all">
-                    <div class="absolute top-0 right-0 bg-blue-500 text-white text-[9px] font-black uppercase px-4 py-1 rounded-bl-xl tracking-wider">
-                        DISARANKAN
-                    </div>
+                <div class="relative bg-white border border-blue-500 rounded-2xl p-8 shadow-lg">
+                    <div class="absolute top-0 right-0 bg-blue-500 text-white text-[9px] font-black uppercase px-4 py-1 rounded-bl-xl rounded-tr-2xl tracking-wider">
+                            DISARANKAN
+                        </div>
                     
                     <div class="space-y-4">
                         <div>

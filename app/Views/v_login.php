@@ -12,7 +12,7 @@
         <a href="<?= base_url('/') ?>" class="text-2xl font-bold tracking-wider text-[#0B132B]">
             <span class="text-blue-600">❖</span> PWNED
         </a>
-        <p class="text-sm text-gray-500 mt-2">Masuk ke panel kontrol Anda</p>
+        <p class="text-sm text-gray-500 mt-2">Masuk</p>
     </div>
 
     <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 w-full max-w-md">
@@ -52,9 +52,6 @@
             </div>
         </div>
 
-        <div class="mt-6 text-center text-xs text-gray-500">
-            <a href="<?= base_url('/') ?>" class="hover:text-blue-600 transition">← Kembali ke Halaman Utama</a>
-        </div>
     </div>
 
 </body>
