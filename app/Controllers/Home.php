@@ -13,11 +13,21 @@ class Home extends BaseController
     {
         $session = session();
         $usage_count = 0;
-        $usage_limit = 5;
+        $usage_limit = 5; // Default free
 
         // Jika user sudah login, cek dia sudah melakukan berapa pencarian hari ini
         if ($session->get('logged_in')) {
             $user_id = $session->get('id');
+            $paket = $session->get('subscription_plan');
+            
+            // --- TAMBAHAN BARU: Sesuaikan limit awal berdasarkan paket ---
+            if ($paket === 'plus') {
+                $usage_limit = 50;
+            } elseif ($paket === 'pro') {
+                $usage_limit = 999999; // Pro unlimited
+            }
+            // -------------------------------------------------------------
+
             $historyModel = new SearchHistoryModel();
             $usage_count = $historyModel->countUserSearchesToday($user_id);
         }
@@ -27,8 +37,8 @@ class Home extends BaseController
             'status'      => null,
             'email'       => '',
             'details'     => [],
-            'usage_count' => $usage_count, // <-- Kirim data kuota awal
-            'usage_limit' => $usage_limit, // <-- Kirim data batas kuota
+            'usage_count' => $usage_count, 
+            'usage_limit' => $usage_limit, 
             'statistik'   => [
                 'sumber_aktif'      => '48',
                 'tingkat_kebocoran' => 'Kritis',
@@ -126,5 +136,39 @@ class Home extends BaseController
     public function upgrade()
     {
         return view('v_upgrade');
+    }
+
+    // ==========================================
+    // 4. FUNGSI PROSES UPGRADE (Simulasi Transaksi)
+    // ==========================================
+    public function prosesUpgrade($paket)
+    {
+        $session = session();
+        
+        // 1. Pastikan user sudah login
+        if (!$session->get('logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan masuk ke sistem terlebih dahulu untuk berlangganan.');
+        }
+
+        // 2. Validasi apakah nama paketnya benar ('plus' atau 'pro')
+        if (!in_array($paket, ['plus', 'pro'])) {
+            return redirect()->back()->with('error', 'Pilihan paket tidak valid!');
+        }
+
+        $userId = $session->get('id');
+        
+        // 3. Panggil UserModel untuk mengupdate data di database
+        // (Pastikan kamu sudah membuat UserModel sebelumnya)
+        $userModel = new \App\Models\UserModel();
+        
+        $userModel->update($userId, [
+            'subscription_plan' => $paket
+        ]);
+
+        // 4. Update data Session agar user tidak perlu login ulang untuk merasakan efeknya
+        $session->set('subscription_plan', $paket);
+
+        // 5. Lempar kembali ke halaman utama dengan pesan sukses
+        return redirect()->to('/')->with('success', 'Selamat! Akun Anda berhasil di-upgrade ke paket PWNED ' . strtoupper($paket) . ' 🎉');
     }
 }

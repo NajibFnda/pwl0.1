@@ -27,3 +27,6 @@ $routes->get('/logout', 'Auth::logout'); // Untuk fitur keluar
 
 $routes->get('/register', 'Auth::register');
 $routes->post('/auth/saveRegister', 'Auth::saveRegister');
+
+// Rute untuk memproses upgrade paket
+$routes->get('/upgrade/proses/(:segment)', 'Home::prosesUpgrade/$1');

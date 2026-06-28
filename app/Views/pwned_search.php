@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-[#F4F6FA] text-gray-800 font-sans min-h-screen flex flex-col justify-between scroll-smooth">
+<body class="bg-[#F4F6FA] text-gray-800 font-sans min-h-screen flex flex-col justify-between">
 
     <nav class="bg-[#0B132B] px-6 py-4 grid grid-cols-3 items-center text-white sticky top-0 z-50 shadow-md">
         <div class="flex items-center space-x-2">
@@ -15,7 +15,7 @@
         </div>
         
         <div id="nav-container" class="hidden md:flex justify-center space-x-6 text-sm text-gray-300">
-            <a href="<?= base_url('/') ?>" id="nav-home" class="nav-link text-blue-400 font-semibold border-b-2 border-blue-400 pb-1 transition-all duration-200">HOME</a>
+            <a href="#" id="nav-home" class="nav-link text-blue-400 font-semibold border-b-2 border-blue-400 pb-1 transition-all duration-200">HOME</a>
             <a href="#cek-section" id="nav-cek" class="nav-link hover:text-white pb-1 transition-all duration-200">CEK EMAIL</a>
             <a href="#statistik-section" id="nav-statistik" class="nav-link hover:text-white pb-1 transition-all duration-200">STATISTIK</a>
             <a href="#tentang-section" id="nav-tentang" class="nav-link hover:text-white pb-1 transition-all duration-200">TENTANG</a>
@@ -45,6 +45,16 @@
             </a>
         </div>
     </nav>
+
+    <?php if(session()->getFlashdata('success')): ?>
+        <div class="max-w-xl mx-auto mt-6 bg-emerald-50 border border-emerald-200 text-emerald-700 px-6 py-4 rounded-xl shadow-sm flex items-center justify-between animate-pulse">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🎉</span>
+                <p class="font-bold text-sm"><?= session()->getFlashdata('success') ?></p>
+            </div>
+            <button onclick="this.parentElement.style.display='none'" class="text-emerald-500 hover:text-emerald-700 font-bold">&times;</button>
+        </div>
+    <?php endif; ?>
 
     <main class="flex-grow max-w-5xl w-full mx-auto px-6 py-12 space-y-16">
         
@@ -118,7 +128,7 @@
             </div>
         </div>
 
-        <hr id="cek-section" class="border-dashed border-gray-300 my-12">
+        <hr id="cek-section" class="border-dashed border-gray-300 my-12 scroll-mt-24">
 
         <div class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm space-y-6">
             <div class="text-center space-y-2">
@@ -136,38 +146,32 @@
                 </button>
             </form>
 
-<!-- Teks Limit Kuota Berjalan Tepat di Bawah Form -->
             <div class="flex flex-col items-center text-center px-4 space-y-2">
                 <?php 
-                    // Menyiapkan variabel default jika tidak ada operan dari controller
                     $kuota_terpakai = $usage_count ?? 0;
-                    $batas_kuota = $usage_limit ?? 5; // Default 5 untuk user gratis
+                    $batas_kuota = $usage_limit ?? 5; 
                     
-                    // Cek apakah user punya paket premium/pro
-                    $paket = session()->get('subscription_plan');
-                    $is_premium = ($paket === 'pro' || $paket === 'plus');
+                    // Ambil nama paket, default 'free'
+                    $paket = session()->get('subscription_plan') ?? 'free';
                 ?>
 
-                <?php if ($is_premium): ?>
-                    <!-- TAMPILAN UNTUK USER PREMIUM -->
+                <?php if ($paket === 'pro'): ?>
                     <p class="text-xs text-gray-400 tracking-wide">
                         Sisa pengecekan hari ini: <span class="font-bold text-emerald-600">Unlimited ✦</span>
                     </p>
                 <?php else: ?>
-                    <!-- TAMPILAN UNTUK USER GRATIS -->
                     <p class="text-xs text-gray-400 tracking-wide">
-                        Batas pengecekan gratis hari ini: <span class="font-bold text-blue-600"><?= esc($kuota_terpakai) ?>/<?= esc($batas_kuota) ?></span> kali.
+                        Batas pengecekan hari ini: <span class="font-bold text-blue-600"><?= esc($kuota_terpakai) ?>/<?= esc($batas_kuota) ?></span> kali.
                     </p>
 
-                    <!-- Pesan Warning Peringatan Ketika Limit Kuota Habis -->
                     <?php if ($kuota_terpakai >= $batas_kuota): ?>
                         <div class="flex flex-col items-center">
                             <p class="text-sm font-bold text-red-500 animate-pulse flex items-center justify-center gap-1.5">
-                                ⚠️ Batas penggunaan pengecekan email gratis Anda sudah habis!
+                                ⚠️ Batas penggunaan pengecekan email Anda sudah habis!
                             </p>
                             <p class="text-xs text-gray-500 mt-0.5">
-                                Silakan kembali ke website <span class="font-bold text-gray-700">besok</span>, atau 
-                                <a href="<?= base_url('upgrade') ?>" class="text-blue-600 font-bold hover:underline">Upgrade ke Premium</a>
+                                Silakan kembali <span class="font-bold text-gray-700">besok</span>, atau 
+                                <a href="<?= base_url('upgrade') ?>" class="text-blue-600 font-bold hover:underline">Upgrade ke Paket Lebih Tinggi</a>
                             </p>
                         </div>
                     <?php endif; ?>
@@ -245,7 +249,7 @@
             <?php endif; ?>
         </div>
 
-        <div id="statistik-section" class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm space-y-8">
+        <div id="statistik-section" class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm space-y-8 scroll-mt-24">
             <div class="text-center space-y-1">
                 <h2 class="text-2xl font-bold text-gray-900">Statistik Kebocoran Data</h2>
                 <p class="text-xs text-gray-500">Lihat bagaimana tren kebocoran data berkembang secara global.</p>
@@ -307,7 +311,7 @@
 
     </main>
 
-    <section id="tentang-section" class="bg-[#040814] text-white py-16 px-6 border-t border-gray-900">
+    <section id="tentang-section" class="bg-[#040814] text-white py-16 px-6 border-t border-gray-900 scroll-mt-20">
         <div class="max-w-5xl w-full mx-auto space-y-12">
             
             <div class="text-center space-y-2">

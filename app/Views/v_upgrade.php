@@ -97,9 +97,9 @@
                     </div>
 
                     <div class="pt-6 border-t border-gray-100">
-                        <button class="w-full bg-[#004e89] hover:bg-[#00355d] text-white py-2.5 rounded-xl text-xs font-bold transition shadow-md">
+                        <a href="<?= base_url('upgrade/proses/plus') ?>" class="block text-center w-full bg-[#004e89] hover:bg-[#00355d] text-white py-2.5 rounded-xl text-xs font-bold transition shadow-md mt-6">
                             Dapatkan Paket Plus
-                        </button>
+                        </a>
                     </div>
                 </div>
 
@@ -139,9 +139,9 @@
                     </div>
 
                     <div class="pt-6 border-t border-gray-100">
-                        <button class="w-full bg-gray-900 hover:bg-black text-white py-2.5 rounded-xl text-xs font-bold transition shadow-md">
+                        <a href="<?= base_url('upgrade/proses/pro') ?>" class="block text-center w-full bg-gray-900 hover:bg-black text-white py-2.5 rounded-xl text-xs font-bold transition shadow-md mt-6">
                             Dapatkan Paket Pro
-                        </button>
+                        </a>
                     </div>
                 </div>
 

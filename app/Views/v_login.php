@@ -28,7 +28,7 @@
 
             <div>
                 <label for="email" class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Alamat Email</label>
-                <input type="email" id="email" name="email" required placeholder="admin@gmail.com"
+                <input type="email" id="email" name="email" required placeholder="contoh@gmail.com"
                     class="w-full px-4 py-3 bg-gray-50 text-gray-900 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
             </div>
 
@@ -40,7 +40,7 @@
 
             <button type="submit" 
                 class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-md transition flex justify-center items-center gap-2">
-                MASUK SISTEM 🔒
+                MASUK
             </button>
         </form>
         <div class="mt-6 text-center text-xs text-gray-500 border-t border-gray-100 pt-4 space-y-2">
