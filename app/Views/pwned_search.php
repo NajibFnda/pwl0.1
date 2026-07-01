@@ -19,6 +19,11 @@
             <a href="#cek-section" id="nav-cek" class="nav-link hover:text-white pb-1 transition-all duration-200">CEK EMAIL</a>
             <a href="#statistik-section" id="nav-statistik" class="nav-link hover:text-white pb-1 transition-all duration-200">STATISTIK</a>
             <a href="#tentang-section" id="nav-tentang" class="nav-link hover:text-white pb-1 transition-all duration-200">TENTANG</a>
+            <?php if(session()->get('role') === 'admin'): ?>
+            <a href="<?= base_url('admin') ?>" class="nav-link hover:text-white pb-1 transition-all duration-200">
+                PANEL ADMIN
+            </a>
+           <?php endif; ?>
         </div>
         
         <div class="flex justify-end items-center gap-4">
@@ -35,15 +40,17 @@
                     </a>
                 </div>
             <?php else: ?>
-                <a href="<?= base_url('login') ?>" class="text-xs font-semibold text-gray-300 hover:text-white transition">
+                <a href="<?= base_url('login') ?>" class="text-xs font-semibold text-gray-300 hover:text-white transition ">
                     Masuk
                 </a>
             <?php endif; ?>
-
+            <?php if(session()->get('role') === 'user'): ?>
             <a href="<?= base_url('upgrade') ?>" class="flex items-center gap-1.5 bg-[#004e89] hover:bg-[#00355d] text-white px-4 py-1.5 rounded-full text-xs font-semibold transition shadow-md">
                 <span></span> Upgrade
             </a>
+            <?php endif; ?>
         </div>
+        
     </nav>
 
     <?php if(session()->getFlashdata('success')): ?>

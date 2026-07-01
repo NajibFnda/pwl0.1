@@ -141,34 +141,67 @@ class Home extends BaseController
     // ==========================================
     // 4. FUNGSI PROSES UPGRADE (Simulasi Transaksi)
     // ==========================================
-    public function prosesUpgrade($paket)
+public function prosesUpgrade($paket)
+{
+    $session = session();
+    if (!$session->get('logged_in')) return redirect()->to('/login');
+
+    $userId = $session->get('id');
+
+    // Ambil mode dari query string (?mode=tahunan atau ?mode=bulanan)
+    $mode = $this->request->getGet('mode') ?? 'bulanan';
+
+    // Tabel harga RESMI di server — jangan pernah percaya harga dari frontend/JS
+    $hargaTabel = [
+        'plus' => ['bulanan' => 25000, 'tahunan' => 252000], // 21.000 x 12
+        'pro'  => ['bulanan' => 50000, 'tahunan' => 504000], // 42.000 x 12
+    ];
+
+    // Validasi paket & mode supaya tidak bisa dimanipulasi lewat URL
+    if (!isset($hargaTabel[$paket]) || !in_array($mode, ['bulanan', 'tahunan'])) {
+        return redirect()->to('/upgrade')->with('limit_reached', 'Paket atau mode langganan tidak valid.');
+    }
+
+    $harga = $hargaTabel[$paket][$mode];
+
+    // Masa aktif ditentukan oleh MODE, bukan nama paket
+    $expire_date = ($mode === 'tahunan')
+        ? date('Y-m-d', strtotime('+1 year'))
+        : date('Y-m-d', strtotime('+1 month'));
+
+    // Catat Transaksi
+    $transactionModel = new \App\Models\TransactionModel();
+    $id_transaksi = $transactionModel->insert([
+        'user_id' => $userId,
+        'paket'   => $paket,
+        'mode'    => $mode,     // simpan juga mode-nya, berguna untuk nota & admin
+        'harga'   => $harga,
+        'tanggal' => date('Y-m-d H:i:s')
+    ]);
+
+    // Update User
+    $userModel = new \App\Models\UserModel();
+    $userModel->update($userId, [
+        'subscription_plan' => $paket,
+        'expire_date'       => $expire_date
+    ]);
+    $session->set('subscription_plan', $paket);
+
+    return redirect()->to('/upgrade/nota/' . $id_transaksi);
+}
+
+    // Fungsi Baru: Menampilkan Halaman Nota
+    public function nota($id_transaksi)
     {
-        $session = session();
-        
-        // 1. Pastikan user sudah login
-        if (!$session->get('logged_in')) {
-            return redirect()->to('/login')->with('error', 'Silakan masuk ke sistem terlebih dahulu untuk berlangganan.');
-        }
+        $transactionModel = new \App\Models\TransactionModel();
+        // Ambil data transaksi beserta nama & email user
+        $transaksi = $transactionModel->select('transactions.*, users.nama, users.email')
+                                      ->join('users', 'users.id = transactions.user_id')
+                                      ->where('transactions.id', $id_transaksi)
+                                      ->first();
 
-        // 2. Validasi apakah nama paketnya benar ('plus' atau 'pro')
-        if (!in_array($paket, ['plus', 'pro'])) {
-            return redirect()->back()->with('error', 'Pilihan paket tidak valid!');
-        }
+        if (!$transaksi) return redirect()->to('/');
 
-        $userId = $session->get('id');
-        
-        // 3. Panggil UserModel untuk mengupdate data di database
-        // (Pastikan kamu sudah membuat UserModel sebelumnya)
-        $userModel = new \App\Models\UserModel();
-        
-        $userModel->update($userId, [
-            'subscription_plan' => $paket
-        ]);
-
-        // 4. Update data Session agar user tidak perlu login ulang untuk merasakan efeknya
-        $session->set('subscription_plan', $paket);
-
-        // 5. Lempar kembali ke halaman utama dengan pesan sukses
-        return redirect()->to('/')->with('success', 'Selamat! Akun Anda berhasil di-upgrade ke paket PWNED ' . strtoupper($paket) . ' 🎉');
+        return view('v_nota', ['transaksi' => $transaksi]);
     }
 }

@@ -78,7 +78,7 @@
                         <div class="py-3 border-t border-b border-gray-100">
                             <span id="price-plus" class="text-3xl font-black text-gray-900">Rp 25.000</span>
                             <span class="text-gray-400 text-xs font-medium">/bln</span>
-                            <div id="note-plus" class="text-[10px] text-gray-400 mt-0.5 hidden">*Ditagih Rp 250.000 /tahun</div>
+                            <div id="note-plus" class="text-[10px] text-gray-400 mt-0.5 hidden">*Ditagih Rp 252.000 /tahun</div>
                         </div>
 
                         <div class="space-y-3 pt-1">
@@ -97,9 +97,15 @@
                     </div>
 
                     <div class="pt-6 border-t border-gray-100">
-                        <a href="<?= base_url('upgrade/proses/plus') ?>" class="block text-center w-full bg-[#004e89] hover:bg-[#00355d] text-white py-2.5 rounded-xl text-xs font-bold transition shadow-md mt-6">
-                            Dapatkan Paket Plus
-                        </a>
+                        <?php if(session()->get('subscription_plan') === 'plus'): ?>
+                            <button disabled class="block text-center w-full bg-gray-200 text-gray-500 py-2.5 rounded-xl text-xs font-bold mt-6 cursor-not-allowed">
+                                Paket Anda Saat Ini
+                            </button>
+                        <?php else: ?>
+                            <button onclick="bukaModalPembayaran('plus')" class="block text-center w-full bg-[#004e89] hover:bg-[#00355d] text-white py-2.5 rounded-xl text-xs font-bold transition shadow-md mt-6">
+                                Dapatkan Paket Plus
+                            </button>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -137,15 +143,22 @@
                             </ul>
                         </div>
                     </div>
-
+                    
                     <div class="pt-6 border-t border-gray-100">
-                        <a href="<?= base_url('upgrade/proses/pro') ?>" class="block text-center w-full bg-gray-900 hover:bg-black text-white py-2.5 rounded-xl text-xs font-bold transition shadow-md mt-6">
-                            Dapatkan Paket Pro
-                        </a>
+                        <?php if(session()->get('subscription_plan') === 'pro'): ?>
+                            <button disabled class="block text-center w-full bg-gray-200 text-gray-500 py-2.5 rounded-xl text-xs font-bold mt-6 cursor-not-allowed border border-gray-300">
+                                Paket Anda Saat Ini
+                            </button>
+                        <?php else: ?>
+                            <button onclick="bukaModalPembayaran('pro')" class="block text-center w-full bg-gray-900 hover:bg-black text-white py-2.5 rounded-xl text-xs font-bold transition shadow-md mt-6">
+                                Dapatkan Paket Pro
+                            </button>
+                        <?php endif; ?>
                     </div>
                 </div>
 
             </div>
+            
         </div>
     </main>
 
@@ -162,7 +175,17 @@
         const notePlus = document.getElementById('note-plus');
         const notePro = document.getElementById('note-pro');
 
+        // Tabel harga per paket & mode
+        const HARGA = {
+            plus: { bulanan: 25000, tahunan: 21000 },
+            pro:  { bulanan: 50000, tahunan: 42000 }
+        };
+
+        // State mode langganan yang sedang aktif
+        let modeAktif = 'bulanan';
+
         btnBulanan.addEventListener('click', () => {
+            modeAktif = 'bulanan';
             btnBulanan.className = "px-5 py-1.5 rounded-full text-xs font-bold bg-[#004e89] text-white shadow transition-all";
             btnTahunan.className = "px-5 py-1.5 rounded-full text-xs font-bold text-gray-500 hover:text-gray-800 transition-all";
             pricePlus.textContent = "Rp 25.000";
@@ -172,6 +195,7 @@
         });
 
         btnTahunan.addEventListener('click', () => {
+            modeAktif = 'tahunan';
             btnTahunan.className = "px-5 py-1.5 rounded-full text-xs font-bold bg-[#004e89] text-white shadow transition-all";
             btnBulanan.className = "px-5 py-1.5 rounded-full text-xs font-bold text-gray-500 hover:text-gray-800 transition-all";
             pricePlus.textContent = "Rp 21.000";
@@ -179,6 +203,144 @@
             notePlus.classList.remove('hidden');
             notePro.classList.remove('hidden');
         });
+    </script>
+
+<!-- ========================================== -->
+    <!-- MODAL POP-UP PEMBAYARAN MULTI-METODE -->
+    <!-- ========================================== -->
+    <div id="modal-pembayaran" class="fixed inset-0 z-50 hidden flex justify-center items-center bg-black bg-opacity-60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl w-11/12 max-w-lg p-6 shadow-2xl relative">
+            <!-- Tombol Tutup -->
+            <button onclick="tutupModal()" class="absolute top-4 right-4 text-gray-400 hover:text-rose-500 transition text-2xl font-bold">
+                &times;
+            </button>
+
+            <!-- Header Modal -->
+            <div class="text-center mb-5">
+                <h3 class="text-xl font-black text-gray-900">Selesaikan Pembayaran</h3>
+                <p class="text-sm text-gray-500 mt-1">Pilih metode pembayaran yang paling nyaman untuk Anda.</p>
+            </div>
+
+            <!-- Detail Pesanan -->
+            <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-5 flex justify-between items-center">
+                <div>
+                    <span class="block text-xs text-blue-500 uppercase font-bold">Total Tagihan</span>
+                    <span id="modal-paket-nama" class="font-bold text-gray-800 text-sm">Paket</span>
+                </div>
+                <div id="modal-harga" class="text-2xl font-black text-blue-700">Rp 0</div>
+            </div>
+
+            <!-- Pilihan Metode Pembayaran -->
+            <div class="grid grid-cols-3 gap-2 mb-5">
+                <button onclick="pilihMetode('qris')" id="btn-qris" class="metode-btn py-2 border-2 border-blue-500 bg-blue-50 rounded-lg text-sm font-bold text-blue-700 transition">
+                    QRIS
+                </button>
+                <button onclick="pilihMetode('paypal')" id="btn-paypal" class="metode-btn py-2 border border-gray-200 bg-white hover:bg-gray-50 rounded-lg text-sm font-bold text-gray-500 transition">
+                    PayPal
+                </button>
+                <button onclick="pilihMetode('bank')" id="btn-bank" class="metode-btn py-2 border border-gray-200 bg-white hover:bg-gray-50 rounded-lg text-sm font-bold text-gray-500 transition">
+                    Transfer Bank
+                </button>
+            </div>
+
+            <!-- KONTEN DINAMIS BERDASARKAN METODE -->
+            <div class="min-h-[180px]">
+                
+                <!-- 1. Konten QRIS -->
+                <div id="konten-qris" class="konten-pembayaran flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl p-6 bg-white">
+                    <div class="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200 shadow-sm mb-3">
+                        <span class="text-5xl">📱</span>
+                    </div>
+                    <p class="text-xs text-center text-gray-400 font-medium">Buka aplikasi m-banking atau e-wallet Anda<br>lalu scan QR Code di atas.</p>
+                </div>
+
+                <!-- 2. Konten PayPal -->
+                <div id="konten-paypal" class="konten-pembayaran hidden flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl p-6 bg-white text-center">
+                    <span class="text-5xl mb-3 text-blue-500">💳</span>
+                    <p class="text-sm font-bold text-gray-700">Bayar dengan Saldo PayPal</p>
+                    <p class="text-xs text-gray-500 mt-1 mb-4">Anda akan diarahkan ke halaman login PayPal untuk menyelesaikan transaksi.</p>
+                    <div class="bg-gray-100 px-4 py-2 rounded-md text-xs font-mono text-gray-600">payment@pwned.com</div>
+                </div>
+
+                <!-- 3. Konten Transfer Bank -->
+                <div id="konten-bank" class="konten-pembayaran hidden flex flex-col justify-center border-2 border-dashed border-gray-200 rounded-xl p-4 bg-white">
+                    <p class="text-sm font-bold text-gray-700 mb-3 text-center">Transfer ke Virtual Account (VA)</p>
+                    
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100">
+                            <span class="font-bold text-blue-800">BCA</span>
+                            <span class="font-mono text-sm text-gray-700 tracking-wider">8077 0812 3456</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100">
+                            <span class="font-bold text-orange-600">BNI</span>
+                            <span class="font-mono text-sm text-gray-700 tracking-wider">829 0812 3456 78</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Tombol Aksi Bawah -->
+            <div class="flex gap-3 mt-6">
+                <button onclick="tutupModal()" class="w-1/3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition text-sm">
+                    Batal
+                </button>
+                <a href="#" id="btn-konfirmasi" class="w-2/3 bg-gray-900 hover:bg-black text-white text-center font-bold py-3 rounded-xl transition text-sm shadow-md flex items-center justify-center gap-2">
+                    <span>Konfirmasi Pembayaran</span>
+                    <span class="text-lg">→</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+<!-- ========================================== -->
+    <!-- SCRIPT LOGIKA MODAL PEMBAYARAN -->
+    <!-- ========================================== -->
+    <script>
+        // Fungsi memunculkan modal dan set harga
+// Fungsi memunculkan modal dan set harga
+function bukaModalPembayaran(paket) {
+    const harga = HARGA[paket][modeAktif];
+    const totalTahunan = harga * 12;
+
+    document.getElementById('modal-paket-nama').innerText =
+        'PAKET ' + paket.toUpperCase() + ' (' + (modeAktif === 'tahunan' ? 'Tahunan' : 'Bulanan') + ')';
+
+    const nilaiDitampilkan = modeAktif === 'tahunan' ? totalTahunan : harga;
+    let rupiah = nilaiDitampilkan.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' });
+    document.getElementById('modal-harga').innerText = rupiah.replace(',00', '');
+
+    document.getElementById('btn-konfirmasi').href =
+        "<?= base_url('upgrade/proses/') ?>" + paket + "?mode=" + modeAktif;
+
+    // Reset ke QRIS setiap kali dibuka
+    pilihMetode('qris');
+
+    document.getElementById('modal-pembayaran').classList.remove('hidden');
+}
+
+// Fungsi menyembunyikan modal
+function tutupModal() {
+    document.getElementById('modal-pembayaran').classList.add('hidden');
+}
+
+// Fungsi mengganti tab metode pembayaran
+function pilihMetode(metode) {
+    let btns = document.querySelectorAll('.metode-btn');
+    btns.forEach(btn => {
+        btn.className = "metode-btn py-2 border border-gray-200 bg-white hover:bg-gray-50 rounded-lg text-sm font-bold text-gray-500 transition";
+    });
+
+    let btnAktif = document.getElementById('btn-' + metode);
+    btnAktif.className = "metode-btn py-2 border-2 border-blue-500 bg-blue-50 rounded-lg text-sm font-bold text-blue-700 transition";
+
+    let kontens = document.querySelectorAll('.konten-pembayaran');
+    kontens.forEach(konten => {
+        konten.classList.add('hidden');
+    });
+
+    document.getElementById('konten-' + metode).classList.remove('hidden');
+}
     </script>
 </body>
 </html>
